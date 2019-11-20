@@ -54,8 +54,7 @@
 @foreach (Movie movie in Model.Movies)
 {
 	<div class="movie-entry">
-		<h4>
-			@movie.Title
+		<h4>@movie.Title
 		<smaller>
 			@(movie.MPAA_Rating == null ? "" : $"({movie.MPAA_Rating})")
 		</smaller>
