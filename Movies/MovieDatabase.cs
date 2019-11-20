@@ -12,7 +12,7 @@ namespace Movies
     /// </summary>
     public class MovieDatabase
     {
-        private List<Movie> movies = new List<Movie>();
+        private static List<Movie> movies = new List<Movie>();
 
         /// <summary>
         /// Loads the movie database from the JSON file
@@ -26,42 +26,66 @@ namespace Movies
             }
         }
 
-        public List<Movie> SearchAndFilter(string search, List<string> rating)
+        public static List<Movie> Search(List<Movie> movies, string term)
         {
-            if (search == null && rating.Count == 0)
-            {
-                return All;
-            }
             List<Movie> results = new List<Movie>();
             foreach (Movie movie in movies)
             {
-                if (search != null && rating.Count > 0)
+                if (movie.Title != null && movie.Title.Contains(term, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (movie.Title != null
-                        && movie.Title.Contains(search, StringComparison.InvariantCultureIgnoreCase)
-                        && rating.Contains(movie.MPAA_Rating))
-                    {
-                        results.Add(movie);
-                    }
-                }
-                else if (search != null)
-                {
-                    if (movie.Title != null && movie.Title.Contains(search, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        results.Add(movie);
-                    }
-                }
-                else if (rating.Count > 0)
-                {
-                    if (rating.Contains(movie.MPAA_Rating))
-                    {
-                        results.Add(movie);
-                    }
+                    results.Add(movie);
                 }
             }
             return results;
         }
+        public static List<Movie> FilterByMPAA(List<Movie> movies, List<string> mpaa)
+        {
+            List<Movie> results = new List<Movie>();
 
-        public List<Movie> All { get { return movies; } }
+            foreach(Movie movie in movies)
+            {
+                if (mpaa.Contains(movie.MPAA_Rating))
+                    results.Add(movie);
+            }
+            return results;
+        }
+
+        public static List<Movie> All 
+        { 
+            get {
+                if (movies == null)
+                {
+                    using (StreamReader file = System.IO.File.OpenText("movies.json"))
+                    {
+                        string json = file.ReadToEnd();
+                        movies = JsonConvert.DeserializeObject<List<Movie>>(json);
+                    }
+                }
+                return movies;
+            } 
+        }
+        public static List<Movie> FilterByMinIMDB(List<Movie> movies, float rating)
+        {
+            List<Movie> results = new List<Movie>();
+
+            foreach (Movie movie in movies)
+            {
+                if (movie.IMDB_Rating != null && movie.IMDB_Rating >= rating)
+                    results.Add(movie);
+            }
+            return results;
+        }
+
+        public static List<Movie> FilterByMaxIMDB(List<Movie> movies, float rating)
+        {
+            List<Movie> results = new List<Movie>();
+
+            foreach (Movie movie in movies)
+            {
+                if (movie.IMDB_Rating != null && movie.IMDB_Rating <= rating)
+                    results.Add(movie);
+            }
+            return results;
+        }
     }
 }
